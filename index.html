@@ -1,510 +1,1015 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Pinxy's Treats</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --pink: #E91E8C;
-    --pink-light: #F48CB8;
-    --bg: #FAF7F5;
-    --bg2: #F3EEE9;
-    --text: #2D2D2D;
-    --text-muted: #7A7A7A;
-    --glass-bg: rgba(255,255,255,0.45);
-    --glass-border: rgba(233,30,140,0.18);
-    --card-bg: #FFFFFF;
-    --nav-bg: rgba(255,255,255,0.55);
-    --nav-border: rgba(233,30,140,0.2);
-    --shadow: rgba(233,30,140,0.1);
-  }
+:root {
+  --rose:   #C8185C;
+  --blush:  #F5D0E4;
+  --cream:  #FAF6F2;
+  --parch:  #F5EDE6;
+  --text:   #2A1520;
+  --muted:  #907080;
+  --white:  #FAF6F2;
+}
 
-  [data-theme="dark"] {
-    --bg: #1A1118;
-    --bg2: #221820;
-    --text: #F0E8EC;
-    --text-muted: #A08898;
-    --glass-bg: rgba(40,20,35,0.55);
-    --glass-border: rgba(233,30,140,0.25);
-    --card-bg: #2A1E26;
-    --nav-bg: rgba(30,15,25,0.7);
-    --nav-border: rgba(233,30,140,0.3);
-    --shadow: rgba(0,0,0,0.3);
-  }
+[data-theme="dark"] { filter: invert(1) hue-rotate(180deg); }
+[data-theme="dark"] .card-emoji,
+[data-theme="dark"] .bg-slide img { filter: invert(1) hue-rotate(180deg); }
 
-  html, body {
-    height: 100%;
-    background: var(--bg2);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: 'Inter', sans-serif;
-    color: var(--text);
-    transition: background 0.3s ease;
-  }
+html { scroll-behavior: smooth; }
 
-  #app {
-    position: relative;
-    width: 100%;
-    max-width: 430px;
-    height: 100dvh;
-    max-height: 900px;
-    background: var(--bg);
-    border-radius: 36px 36px 0 0;
-    overflow: hidden;
-    box-shadow: 0 -4px 32px rgba(0,0,0,0.12);
-    display: flex;
-    flex-direction: column;
-    transition: background 0.3s ease;
-  }
+body {
+  min-height: 100dvh;
+  background: #E8D8E2;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  font-family: 'Nunito', sans-serif;
+  color: var(--text);
+}
 
-  @media (max-width: 480px) {
-    body { background: var(--bg2); align-items: flex-end; justify-content: center; }
-    #app {
-      max-width: 100%;
-      height: 100dvh;
-      max-height: 100dvh;
-      border-radius: 36px 36px 0 0;
-      margin-top: env(safe-area-inset-top, 14px);
-    }
-  }
+/* ── APP SHELL ── */
+#app {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: calc(100dvh - env(safe-area-inset-top, 14px));
+  margin-top: env(safe-area-inset-top, 14px);
+  background: var(--cream);
+  border-radius: 32px 32px 0 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  box-shadow: 0 -8px 48px rgba(150,30,80,0.15);
+  padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+}
+#app::-webkit-scrollbar { display: none; }
 
+/* ── BACKGROUND SLIDESHOW ── */
+.bg-slideshow {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  max-width: 430px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 32px 32px 0 0;
+  overflow: hidden;
+}
+.bg-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+}
+.bg-slide.active { opacity: 1; }
+.bg-slide img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg,
+    rgba(237,210,226,0.82) 0%,
+    rgba(245,225,235,0.78) 30%,
+    rgba(250,240,245,0.75) 60%,
+    rgba(250,246,242,0.88) 100%
+  );
+}
+
+/* Everything above bg */
+#app > *:not(.bg-slideshow) { position: relative; z-index: 1; }
+
+/* ── HERO ── */
+#hero {
+  min-height: 54dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 24px 44px;
+  position: relative;
+  text-align: center;
+}
+
+.brand-wrap { margin-bottom: 22px; }
+.brand-icon { font-size: 2rem; display: block; margin-bottom: 4px; }
+.brand-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 3rem;
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-decoration: underline;
+  text-underline-offset: 8px;
+  text-decoration-color: var(--rose);
+  text-decoration-thickness: 1.5px;
+  animation: floatUp 0.8s cubic-bezier(.22,1,.36,1) both;
+}
+.brand-underline {
+  width: 50px; height: 1px;
+  background: var(--rose);
+  opacity: 0.4;
+  margin: 8px auto 10px;
+}
+.brand-tagline {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 0.95rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  animation: floatUp 0.9s cubic-bezier(.22,1,.36,1) both;
+  animation-delay: 0.1s;
+}
+
+/* Greeting glass pill */
+.greeting-pill {
+  border-radius: 30px;
+  padding: 10px 22px;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.42) 0%,
+    rgba(255,255,255,0.15) 50%,
+    rgba(255,180,220,0.18) 100%
+  );
+  border: 1px solid rgba(255,255,255,0.6);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.75),
+    inset 0 -1px 1px rgba(180,60,110,0.08),
+    0 4px 20px rgba(150,30,80,0.1);
+  position: relative;
+  overflow: hidden;
+  animation: floatUp 1s cubic-bezier(.22,1,.36,1) both;
+  animation-delay: 0.2s;
+  text-align: center;
+}
+.greeting-pill::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  pointer-events: none;
+}
+.greeting-time {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  position: relative; z-index: 1;
+}
+.greeting-suggest {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--rose);
+  margin-top: 3px;
+  position: relative; z-index: 1;
+}
+
+/* ── WAVE ── */
+.wave { display: block; width: 100%; line-height: 0; }
+.wave svg { display: block; width: 100%; }
+
+/* ── SECTIONS ── */
+.section { padding: 28px 22px; }
+.section-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.1;
+  margin-bottom: 3px;
+}
+.section-sub {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+/* ── PICKS HORIZONTAL SCROLL ── */
+#picks { background: transparent; }
+.picks-scroll {
+  display: flex;
+  gap: 11px;
+  overflow-x: auto;
+  padding: 4px 2px 10px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.picks-scroll::-webkit-scrollbar { display: none; }
+
+.pick-tile {
+  flex-shrink: 0;
+  border-radius: 26px;
+  padding: 16px 16px 14px;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: transform 0.18s;
+  background: linear-gradient(145deg,
+    rgba(255,255,255,0.48) 0%,
+    rgba(255,210,235,0.2) 100%
+  );
+  border: 1px solid rgba(255,255,255,0.65);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.8),
+    inset 0 -1px 1px rgba(180,60,110,0.06),
+    0 4px 18px rgba(150,30,80,0.09),
+    0 1px 3px rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+}
+.pick-tile::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 42%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.52) 0%, transparent 100%);
+  pointer-events: none;
+}
+.pick-tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+    rgba(255,150,200,0.1) 0%,
+    transparent 50%,
+    rgba(180,100,255,0.04) 100%
+  );
+  pointer-events: none;
+}
+.pick-tile:active { transform: scale(0.95); }
+.pick-tile.special .pick-name::after {
+  content: ' ✦';
+  font-size: 0.6rem;
+  color: #C49A6C;
+}
+
+.pick-emoji { font-size: 1.9rem; line-height: 1; position: relative; z-index: 1; }
+.pick-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.2;
+  position: relative; z-index: 1;
+}
+.pick-drink {
+  font-size: 0.62rem;
+  color: var(--rose);
+  font-weight: 600;
+  background: rgba(200,24,92,0.08);
+  border-radius: 20px;
+  padding: 2px 8px;
+  position: relative; z-index: 1;
+  text-align: center;
+}
+
+/* ── MENU ── */
+#menu { background: transparent; }
+.menu-list { display: flex; flex-direction: column; }
+.menu-item-wrap {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(180,140,160,0.15);
+}
+.menu-item-wrap:last-child { border-bottom: none; }
+.menu-top {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+}
+.menu-item-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+.menu-dots {
+  flex: 1;
+  border-bottom: 1.5px dotted rgba(144,112,128,0.3);
+  margin-bottom: 4px;
+  min-width: 16px;
+}
+.menu-price {
+  font-size: 0.75rem;
+  color: var(--rose);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.menu-desc {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.drinks-soon {
+  margin-top: 24px;
+  text-align: center;
+  padding: 26px 20px;
+  border-radius: 22px;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.42) 0%,
+    rgba(255,210,235,0.2) 100%
+  );
+  border: 1px solid rgba(255,255,255,0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.7), 0 2px 12px rgba(150,30,80,0.07);
+}
+.drinks-soon .ds-icon { font-size: 2rem; margin-bottom: 8px; }
+.drinks-soon .ds-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--text);
+}
+.drinks-soon .ds-note { font-size: 0.72rem; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+/* ── CONTACT ── */
+#contact { background: transparent; text-align: center; }
+.contact-list { display: flex; flex-direction: column; gap: 0; margin-top: 4px; }
+.contact-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(180,140,160,0.15);
+}
+.contact-row:last-child { border-bottom: none; }
+.contact-lbl {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.contact-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--rose);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.contact-val a { color: var(--rose); text-decoration: underline; text-underline-offset: 3px; }
+
+.signoff {
+  margin-top: 22px;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.signoff strong {
+  display: block;
+  color: var(--rose);
+  font-size: 1rem;
+  margin-top: 6px;
+  font-style: normal;
+}
+
+/* ── FLOATING GLASS TOGGLE ── */
+.dark-toggle {
+  position: fixed;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  right: calc(50% - 215px + 12px);
+  z-index: 999;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.6);
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.45) 0%,
+    rgba(255,200,230,0.2) 100%
+  );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.8),
+    0 4px 16px rgba(150,30,80,0.12);
+  cursor: pointer;
+  font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.2s;
+}
+.dark-toggle:active { transform: scale(0.93); }
+
+/* On small screens anchor to right edge */
+@media (max-width: 480px) {
   .dark-toggle {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    z-index: 200;
-    background: rgba(255,255,255,0.22);
-    border: 1px solid rgba(233,30,140,0.22);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border-radius: 50%;
-    width: 34px;
-    height: 34px;
-    cursor: pointer;
-    font-size: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    right: 14px;
   }
-  [data-theme="dark"] .dark-toggle {
-    background: rgba(20,10,18,0.28);
-    border-color: rgba(233,30,140,0.28);
-  }
-  .dark-toggle:hover { background: rgba(233,30,140,0.15); }
+}
 
-  .content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 60px 22px 100px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--pink) transparent;
-  }
-  .content::-webkit-scrollbar { width: 4px; }
-  .content::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 2px; }
+/* ── NAV PILL ── */
+.nav-pill {
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 40px;
+  padding: 7px 22px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  z-index: 998;
+  background: linear-gradient(135deg,
+    rgba(255,255,255,0.42) 0%,
+    rgba(255,255,255,0.15) 50%,
+    rgba(255,180,220,0.18) 100%
+  );
+  border: 1px solid rgba(255,255,255,0.62);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.82),
+    inset 0 -1px 1px rgba(180,60,110,0.06),
+    0 8px 32px rgba(150,30,80,0.13),
+    0 2px 6px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+.nav-pill::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, transparent 100%);
+  pointer-events: none;
+}
+.nav-pill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+    rgba(255,150,200,0.1) 0%,
+    transparent 50%,
+    rgba(200,100,255,0.04) 100%
+  );
+  pointer-events: none;
+}
 
-  .page { display: none; animation: fadeIn 0.3s ease; }
-  .page.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 12px;
+  border-radius: 24px;
+  transition: all 0.2s;
+  color: rgba(42,21,32,0.4);
+  position: relative; z-index: 1;
+}
+.nav-btn.active { color: var(--rose); }
+.nav-btn svg { width: 17px; height: 17px; stroke-width: 1.6; }
+.nav-btn span { font-size: 0.5rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
 
-  .home-header { text-align: center; padding: 10px 0 24px; }
+/* ── POPUP SHEET ── */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(42,21,32,0.3);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.popup-overlay.active { opacity: 1; pointer-events: all; }
 
-  .brand-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 600;
-    font-size: 2.6rem;
-    color: var(--text);
-    text-decoration: underline;
-    text-underline-offset: 6px;
-    text-decoration-color: var(--pink);
-    letter-spacing: 0.01em;
-    line-height: 1.1;
-  }
+.popup-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(110%);
+  width: 100%;
+  max-width: 430px;
+  background: linear-gradient(160deg, #EDD5E2 0%, #FAF6F2 55%);
+  border-radius: 28px 28px 0 0;
+  padding: 20px 24px calc(32px + env(safe-area-inset-bottom, 0px));
+  z-index: 1001;
+  transition: transform 0.38s cubic-bezier(.22,1,.36,1);
+  box-shadow: 0 -8px 48px rgba(42,21,32,0.14);
+}
+.popup-sheet.active { transform: translateX(-50%) translateY(0); }
 
-  .greeting-line {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 300;
-    font-size: 1.15rem;
-    color: var(--text);
-    margin-top: 18px;
-    font-style: italic;
-    letter-spacing: 0.02em;
-  }
+.popup-handle {
+  width: 34px; height: 4px;
+  background: rgba(144,112,128,0.25);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.popup-close {
+  position: absolute;
+  top: 18px; right: 18px;
+  background: rgba(144,112,128,0.12);
+  border: none; border-radius: 50%;
+  width: 28px; height: 28px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted);
+  transition: background 0.2s;
+}
+.popup-close:hover { background: rgba(200,24,92,0.1); }
 
-  .suggestion-line {
-    font-family: 'Cormorant Garamond', serif;
-    font-weight: 400;
-    font-size: 1.1rem;
-    color: var(--pink);
-    margin-top: 6px;
-    font-style: italic;
-    letter-spacing: 0.02em;
-    min-height: 1.6rem;
-    transition: opacity 0.4s;
-  }
+.popup-emoji-big { font-size: 2.2rem; text-align: center; display: block; margin-bottom: 4px; }
+.popup-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.55rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 3px;
+}
+.popup-drink-tag {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--rose);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.popup-desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 0.98rem;
+  color: var(--text);
+  line-height: 1.65;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.popup-health {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.5;
+  text-align: center;
+  margin-bottom: 16px;
+  padding: 9px 12px;
+  background: rgba(144,112,128,0.08);
+  border-radius: 12px;
+}
 
-  .divider {
-    height: 1.5px;
-    background: linear-gradient(90deg, transparent, var(--pink), transparent);
-    margin: 20px 0;
-    opacity: 0.4;
-  }
+/* Order button → expands to show contact */
+.popup-order-btn {
+  width: 100%;
+  background: var(--rose);
+  color: white;
+  border: none;
+  border-radius: 22px;
+  padding: 13px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: opacity 0.2s, transform 0.15s;
+  box-shadow: 0 4px 16px rgba(200,24,92,0.22);
+}
+.popup-order-btn:active { transform: scale(0.98); opacity: 0.9; }
 
-  .section-label {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--pink);
-    margin-bottom: 14px;
-  }
+/* Expanded contact inside popup */
+.popup-contact {
+  display: none;
+  margin-top: 14px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+}
+.popup-contact.open { display: block; }
+.popup-contact-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(180,140,160,0.12);
+  text-decoration: none;
+}
+.popup-contact-row:last-child { border-bottom: none; }
+.pcr-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+.pcr-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--rose);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
-  .suggestion-grid { display: flex; flex-direction: column; gap: 10px; }
-
-  .suggestion-card {
-    background: var(--card-bg);
-    border-radius: 16px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    box-shadow: 0 2px 12px var(--shadow);
-    border: 1px solid rgba(233,30,140,0.08);
-    transition: transform 0.15s;
-  }
-  .suggestion-card:active { transform: scale(0.98); }
-
-  .card-emoji { font-size: 1.8rem; line-height: 1; }
-  .card-info { flex: 1; }
-  .card-name {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--text);
-  }
-  .card-detail { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
-  .card-drink { font-size: 0.75rem; color: var(--pink); font-weight: 500; text-align: right; white-space: nowrap; }
-
-  .menu-section-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 14px;
-    margin-top: 24px;
-  }
-
-  .menu-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    border-radius: 14px;
-    overflow: hidden;
-    border: 1.5px solid var(--pink);
-  }
-  .menu-table th {
-    background: var(--pink);
-    color: white;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 10px 14px;
-    text-align: left;
-  }
-  .menu-table td {
-    padding: 11px 14px;
-    font-size: 0.88rem;
-    color: var(--pink);
-    font-family: 'Inter', sans-serif;
-    border-bottom: 1px solid rgba(233,30,140,0.12);
-  }
-  .menu-table tr:last-child td { border-bottom: none; }
-  .menu-table tr:nth-child(even) td { background: rgba(233,30,140,0.04); }
-
-  .coming-soon-box {
-    background: var(--card-bg);
-    border: 1.5px dashed var(--pink);
-    border-radius: 14px;
-    padding: 28px;
-    text-align: center;
-    margin-top: 10px;
-  }
-  .coming-soon-box .cs-emoji { font-size: 2rem; margin-bottom: 10px; }
-  .coming-soon-box p { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: var(--pink); font-style: italic; }
-  .coming-soon-box span { font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 4px; font-family: 'Inter', sans-serif; }
-
-  .contact-header { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; color: var(--text); margin-bottom: 6px; margin-top: 10px; }
-  .contact-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 28px; }
-  .contact-list { display: flex; flex-direction: column; gap: 14px; }
-
-  .contact-item {
-    background: var(--card-bg);
-    border-radius: 14px;
-    padding: 16px 18px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    box-shadow: 0 2px 10px var(--shadow);
-    border: 1px solid rgba(233,30,140,0.08);
-  }
-  .contact-icon {
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    background: rgba(233,30,140,0.1);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem; flex-shrink: 0;
-  }
-  .contact-label { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px; }
-  .contact-value { font-size: 0.95rem; color: var(--pink); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
-  .contact-value a { color: var(--pink); text-decoration: underline; text-underline-offset: 3px; }
-
-  .nav-pill {
-    position: absolute;
-    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255,255,255,0.18);
-    border: 1px solid rgba(233,30,140,0.18);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border-radius: 40px;
-    padding: 7px 20px;
-    display: flex;
-    gap: 26px;
-    align-items: center;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
-    z-index: 100;
-  }
-  [data-theme="dark"] .nav-pill {
-    background: rgba(20,10,18,0.22);
-    border-color: rgba(233,30,140,0.22);
-  }
-
-  .nav-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    padding: 3px 4px;
-    border-radius: 10px;
-    transition: all 0.2s;
-    color: var(--text-muted);
-  }
-  .nav-btn.active { color: var(--pink); }
-  .nav-btn svg { width: 19px; height: 19px; stroke-width: 1.8; }
-  .nav-btn span { font-size: 0.55rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; }
+/* ── ANIMATIONS ── */
+@keyframes floatUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <button class="dark-toggle" onclick="toggleDark()" id="darkBtn">🌙</button>
-
-  <div class="content">
-
-    <!-- HOME -->
-    <div class="page active" id="page-home">
-      <div class="home-header">
-        <div class="brand-title">Pinxy's Treats</div>
-        <div class="greeting-line" id="greetingLine">Good morning!</div>
-        <div class="suggestion-line" id="suggestionLine"></div>
-      </div>
-      <div class="divider"></div>
-      <div class="section-label">Today's picks for you</div>
-      <div class="suggestion-grid" id="suggestionGrid"></div>
+  <!-- Background slideshow -->
+  <div class="bg-slideshow" id="bgSlideshow">
+    <div class="bg-slide active" id="slide-0">
+      <img src="https://source.unsplash.com/800x1200/?cupcake,pink,bakery" alt="" loading="lazy"/>
     </div>
-
-    <!-- MENU -->
-    <div class="page" id="page-menu">
-      <div class="menu-section-title">Our Menu</div>
-      <div class="section-label">Baked Goods & Pastries</div>
-      <table class="menu-table">
-        <thead>
-          <tr><th>Item</th><th>Description</th><th>Price</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Classic Cupcake</td><td>Vanilla or chocolate, whipped frosting</td><td>₦1,500 per piece</td></tr>
-          <tr><td>Red Velvet Cake</td><td>Layered with cream cheese frosting</td><td>₦18,000 whole / ₦2,500 slice</td></tr>
-          <tr><td>Chocolate Cake</td><td>Rich ganache, moist layers</td><td>₦20,000 whole / ₦2,500 slice</td></tr>
-          <tr><td>Banana Bread</td><td>Soft loaf with ripe banana, hint of cinnamon</td><td>₦5,000 loaf / ₦800 slice</td></tr>
-          <tr><td>Cinnamon Rolls</td><td>Glazed, warm, pull-apart rolls</td><td>₦2,000 per piece</td></tr>
-          <tr><td>Sardine Bread</td><td>Soft roll stuffed with spiced sardine</td><td>₦1,500 per piece</td></tr>
-          <tr><td>Meat Pie</td><td>Flaky pastry, minced beef & veg filling</td><td>₦2,000 per piece</td></tr>
-          <tr><td>Chicken Pie</td><td>Tender chicken in creamy pastry shell</td><td>₦2,500 per piece</td></tr>
-          <tr><td>Sausage Roll</td><td>Puff pastry wrapped seasoned sausage</td><td>₦1,500 per piece</td></tr>
-          <tr><td>Doughnut</td><td>Glazed or sugar-coated, airy inside</td><td>₦1,000 per piece</td></tr>
-          <tr><td>Puff Puff</td><td>Deep-fried dough balls, lightly sweetened</td><td>₦3,000 pack of 6</td></tr>
-          <tr><td>Chin Chin</td><td>Crispy fried snack, crunchy & golden</td><td>₦2,000 small / ₦3,500 large</td></tr>
-          <tr><td>Custom Cake</td><td>Order ahead — any flavor, any occasion</td><td>Price on request</td></tr>
-        </tbody>
-      </table>
-
-      <div class="menu-section-title" style="margin-top:30px;">Drinks</div>
-      <div class="coming-soon-box">
-        <div class="cs-emoji">🥤</div>
-        <p>Coming Soon</p>
-        <span>We're working on something delicious to sip alongside your treats.</span>
-      </div>
+    <div class="bg-slide" id="slide-1">
+      <img src="https://source.unsplash.com/800x1200/?cinnamon-roll,pastry,warm" alt="" loading="lazy"/>
     </div>
-
-    <!-- CONTACT -->
-    <div class="page" id="page-contact">
-      <div class="contact-header">Get in Touch</div>
-      <div class="contact-sub">Place an order, ask a question, or book Pinxy for your next event.</div>
-      <div class="contact-list">
-        <div class="contact-item">
-          <div class="contact-icon">📞</div>
-          <div>
-            <div class="contact-label">Phone 1 :</div>
-            <div class="contact-value"><a href="tel:+2348000000001">+234 800 000 0001</a></div>
-          </div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">📱</div>
-          <div>
-            <div class="contact-label">Phone 2 :</div>
-            <div class="contact-value"><a href="tel:+2348000000002">+234 800 000 0002</a></div>
-          </div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">💬</div>
-          <div>
-            <div class="contact-label">WhatsApp :</div>
-            <div class="contact-value"><a href="https://wa.me/2348000000001" target="_blank">+234 800 000 0001</a></div>
-          </div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">✉️</div>
-          <div>
-            <div class="contact-label">Email :</div>
-            <div class="contact-value"><a href="mailto:hello@pinxytreats.com">hello@pinxytreats.com</a></div>
-          </div>
-        </div>
-      </div>
+    <div class="bg-slide" id="slide-2">
+      <img src="https://source.unsplash.com/800x1200/?chocolate-cake,dessert" alt="" loading="lazy"/>
     </div>
-
+    <div class="bg-slide" id="slide-3">
+      <img src="https://source.unsplash.com/800x1200/?banana-bread,baking" alt="" loading="lazy"/>
+    </div>
+    <div class="bg-slide" id="slide-4">
+      <img src="https://source.unsplash.com/800x1200/?meat-pie,pastry,food" alt="" loading="lazy"/>
+    </div>
+    <div class="bg-overlay"></div>
   </div>
 
-  <nav class="nav-pill">
-    <button class="nav-btn active" id="nav-home" onclick="switchPage('home')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-      <span>Home</span>
-    </button>
-    <button class="nav-btn" id="nav-menu" onclick="switchPage('menu')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-      <span>Menu</span>
-    </button>
-    <button class="nav-btn" id="nav-contact" onclick="switchPage('contact')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.15a16 16 0 006.94 6.94l1.41-1.41a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-      <span>Contact</span>
-    </button>
-  </nav>
+  <!-- ══ HERO ══ -->
+  <section id="hero">
+    <div class="brand-wrap">
+      <span class="brand-icon">🩷</span>
+      <div class="brand-name">Pinxy's Treats</div>
+      <div class="brand-underline"></div>
+      <div class="brand-tagline">Handmade with love, baked from scratch</div>
+    </div>
+    <div class="greeting-pill">
+      <div class="greeting-time" id="greetingTime">Good afternoon</div>
+      <div class="greeting-suggest" id="greetingSuggest">perfect for a cupcake ❤️</div>
+    </div>
+  </section>
 
+  <!-- wave -->
+  <div class="wave">
+    <svg viewBox="0 0 430 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="height:28px;">
+      <path d="M0,14 C70,28 140,0 210,14 C280,28 350,0 430,14 L430,28 L0,28 Z" fill="rgba(250,246,242,0.5)"/>
+    </svg>
+  </div>
+
+  <!-- ══ TODAY'S PICKS ══ -->
+  <section id="picks" class="section">
+    <div class="section-label">Today's Picks 🧁</div>
+    <div class="section-sub">Suggested for you right now</div>
+    <div class="picks-scroll" id="picksScroll"></div>
+  </section>
+
+  <!-- wave -->
+  <div class="wave">
+    <svg viewBox="0 0 430 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="height:28px;">
+      <path d="M0,6 C90,26 180,0 270,18 C330,30 390,6 430,16 L430,28 L0,28 Z" fill="rgba(245,237,230,0.5)"/>
+    </svg>
+  </div>
+
+  <!-- ══ MENU ══ -->
+  <section id="menu" class="section">
+    <div class="section-label">Our Menu</div>
+    <div class="section-sub">Everything made fresh to order</div>
+    <div class="menu-list" id="menuList"></div>
+    <div class="drinks-soon">
+      <div class="ds-icon">🥤</div>
+      <div class="ds-title">Still perfecting this…</div>
+      <div class="ds-note">Bear with us 🩷 Something delicious to sip alongside your treats is on its way.</div>
+    </div>
+  </section>
+
+  <!-- wave -->
+  <div class="wave">
+    <svg viewBox="0 0 430 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="height:28px;">
+      <path d="M0,18 C60,4 140,26 220,10 C300,-4 380,22 430,12 L430,28 L0,28 Z" fill="rgba(250,246,242,0.5)"/>
+    </svg>
+  </div>
+
+  <!-- ══ CONTACT ══ -->
+  <section id="contact" class="section">
+    <div class="section-label">Come say hello 🩷</div>
+    <div class="section-sub">Place an order, ask anything, or book Pinxy for your next event</div>
+    <div class="contact-list">
+      <div class="contact-row">
+        <span class="contact-lbl">Call us :</span>
+        <span class="contact-val"><a href="tel:+2348000000001">+234 800 000 0001</a></span>
+      </div>
+      <div class="contact-row">
+        <span class="contact-lbl">Or try :</span>
+        <span class="contact-val"><a href="tel:+2348000000002">+234 800 000 0002</a></span>
+      </div>
+      <div class="contact-row">
+        <span class="contact-lbl">WhatsApp :</span>
+        <span class="contact-val"><a href="https://wa.me/2348000000001?text=Hi%20Pinxy%2C%20I%27d%20like%20to%20place%20an%20order!" target="_blank">+234 800 000 0001</a></span>
+      </div>
+      <div class="contact-row">
+        <span class="contact-lbl">Email :</span>
+        <span class="contact-val"><a href="mailto:hello@pinxytreats.com">hello@pinxytreats.com</a></span>
+      </div>
+    </div>
+    <div class="signoff">
+      Every order is made with care and a little extra love.<br>
+      We can't wait to bake something special for you.
+      <strong>— Pinxy 🩷</strong>
+    </div>
+  </section>
+
+</div><!-- /app -->
+
+<!-- Popup overlay -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup()"></div>
+
+<!-- Popup sheet -->
+<div class="popup-sheet" id="popupSheet">
+  <div class="popup-handle"></div>
+  <button class="popup-close" onclick="closePopup()">✕</button>
+  <span class="popup-emoji-big" id="popupEmoji">🧁</span>
+  <div class="popup-name" id="popupName">Cupcake</div>
+  <div class="popup-drink-tag" id="popupDrink">Pairs with: Coffee ☕</div>
+  <div class="popup-desc" id="popupDesc"></div>
+  <div class="popup-health" id="popupHealth"></div>
+  <button class="popup-order-btn" id="popupOrderBtn" onclick="togglePopupContact()">Order this now 🩷</button>
+  <div class="popup-contact" id="popupContact">
+    <a class="popup-contact-row" href="tel:+2348000000001">
+      <span class="pcr-label">Call us</span>
+      <span class="pcr-val">+234 800 000 0001</span>
+    </a>
+    <a class="popup-contact-row" href="https://wa.me/2348000000001?text=Hi%20Pinxy%2C%20I%27d%20like%20to%20place%20an%20order!" target="_blank">
+      <span class="pcr-label">WhatsApp</span>
+      <span class="pcr-val">+234 800 000 0001</span>
+    </a>
+    <a class="popup-contact-row" href="mailto:hello@pinxytreats.com">
+      <span class="pcr-label">Email</span>
+      <span class="pcr-val">hello@pinxytreats.com</span>
+    </a>
+  </div>
 </div>
 
+<!-- Nav pill -->
+<nav class="nav-pill">
+  <button class="nav-btn active" id="nav-home" onclick="navScrollTo('hero')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+    <span>Home</span>
+  </button>
+  <button class="nav-btn" id="nav-menu" onclick="navScrollTo('menu')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <span>Menu</span>
+  </button>
+  <button class="nav-btn" id="nav-contact" onclick="navScrollTo('contact')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    <span>Contact</span>
+  </button>
+</nav>
+
+<!-- Dark mode toggle -->
+<button class="dark-toggle" id="darkBtn" onclick="toggleDark()">🌙</button>
+
 <script>
-  function toggleDark() {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
-    document.getElementById('darkBtn').textContent = isDark ? '🌙' : '☀️';
-  }
+// ── SEASON ──
+function getSeason() {
+  const m = new Date().getMonth() + 1;
+  if (m >= 11 || m <= 2) return 'harmattan';
+  if (m >= 3 && m <= 4)  return 'hot';
+  return 'rainy';
+}
+function getVibeContext(hour, season) {
+  const isMorning   = hour >= 5  && hour < 12;
+  const isAfternoon = hour >= 12 && hour < 17;
+  const isEvening   = hour >= 17 && hour < 21;
+  const timeLabel   = isMorning ? 'morning' : isAfternoon ? 'afternoon' : isEvening ? 'evening' : 'night';
+  const weatherMood = season === 'harmattan' ? 'cold' : season === 'hot' ? 'warm' : (isAfternoon || isEvening) ? 'rainy' : 'cool';
+  return { timeLabel, weatherMood, isMorning, isAfternoon, isEvening };
+}
 
-  function switchPage(name) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('page-' + name).classList.add('active');
-    document.getElementById('nav-' + name).classList.add('active');
-    document.querySelector('.content').scrollTop = 0;
-  }
+// ── SUGGESTION POOL ──
+const allSuggestions = [
+  { food:"Banana Bread",    emoji:"🍌", drink:"Hot tea ☕",      special:false, tags:['warm','sweet','morning','harmattan','anytime'],
+    health:"Bananas are rich in potassium — great for energy and keeping you going through the day.",
+    popup:(t,w)=>`It's ${t} and the air has that ${w==='cold'?'cold harmattan chill':w==='rainy'?'rainy season dampness':'dry warmth'} to it. Banana bread is the ultimate comfort — soft, warm, and just sweet enough to make everything feel okay.` },
+  { food:"Cinnamon Rolls",  emoji:"🌀", drink:"Cold milk 🥛",    special:false, tags:['warm','sweet','morning','harmattan','rainy','anytime'],
+    health:"Cinnamon has anti-inflammatory properties and helps regulate blood sugar — guilt-free indulgence.",
+    popup:(t,w)=>`A ${t} like this calls for something soft and warm. Cinnamon rolls fresh out the oven are basically a hug in pastry form${w==='rainy'?' — perfect while listening to the rain outside':''}.` },
+  { food:"Sardine Bread",   emoji:"🍞", drink:"Fresh juice 🧃",  special:false, tags:['savory','morning','anytime','harmattan','hot'],
+    health:"Sardines are packed with omega-3s and protein — one of the best things you can eat for your heart.",
+    popup:(t,w)=>`This ${t} snack is an underrated classic. Spiced sardine stuffed in a soft roll — savory, filling, and surprisingly addictive. ${w==='cold'?'Warms you right up too.':'Light enough to keep you moving.'}` },
+  { food:"Classic Cupcake", emoji:"🧁", drink:"Coffee ☕",       special:true,  tags:['sweet','anytime','morning','afternoon','hot','rainy','harmattan'],
+    health:"Sometimes joy is the best medicine. A cupcake shared is a mood instantly lifted.",
+    popup:(t,w)=>`There's never a wrong time for a cupcake, but ${t} ${w==='rainy'?'on a rainy day':w==='cold'?'in this harmattan weather':'on a day like this'} hits different. Vanilla or chocolate — both are the right answer.` },
+  { food:"Sausage Roll",    emoji:"🥐", drink:"Juice 🧃",        special:false, tags:['savory','morning','anytime','hot','harmattan'],
+    health:"A good sausage roll gives you protein and carbs together — solid fuel to power through your day.",
+    popup:(t,w)=>`Flaky puff pastry wrapped around seasoned sausage. This ${t} snack is the move${w==='cold'?' — especially when the harmattan has you needing something substantial':''}.` },
+  { food:"Chocolate Cake",  emoji:"🍫", drink:"Espresso ☕",     special:false, tags:['sweet','afternoon','anytime','rainy','harmattan'],
+    health:"Dark chocolate boosts serotonin — literally makes you happier. Science says eat cake.",
+    popup:(t,w)=>`Rich, moist, ganache-covered chocolate cake for ${t}${w==='rainy'?' while the rain falls outside':w==='cold'?' in this cold':''}.` },
+  { food:"Chin Chin",       emoji:"⭐", drink:"Smoothie 🥤",     special:false, tags:['sweet','light','anytime','hot','harmattan'],
+    health:"A light snack that satisfies cravings without a heavy meal — great for mindful snacking.",
+    popup:(t,w)=>`Crunchy, golden, and impossibly moreish. Chin chin is the ${t} snack you didn't know you needed${w==='hot'?' — light enough for the warm weather':''}.` },
+  { food:"Doughnut",        emoji:"🍩", drink:"Latte ☕",        special:false, tags:['sweet','morning','anytime','rainy','harmattan'],
+    health:"Life's too short to skip the doughnut. Treat yourself — balance is key, and today it tips toward joy.",
+    popup:(t,w)=>`Soft, glazed, and airy inside. A ${t} doughnut with a latte${w==='rainy'?' on a grey rainy day':''} is one of those simple pleasures that just works.` },
+  { food:"Meat Pie",        emoji:"🥧", drink:"Cold drink 🥤",   special:true,  tags:['savory','heavy','anytime','rainy','harmattan','afternoon','evening'],
+    health:"Protein-rich filling in a flaky crust — keeps you full and satisfied for hours.",
+    popup:(t,w)=>`${w==='rainy'?'Rainy day energy calls for a meat pie.':w==='cold'?'Cold harmattan afternoon? Meat pie is mandatory.':'This '+t+' is a meat pie moment.'} Flaky pastry, minced beef and veg — filling, satisfying, and absolutely the right call.` },
+  { food:"Chicken Pie",     emoji:"🍗", drink:"Juice 🧃",        special:false, tags:['savory','heavy','anytime','rainy','harmattan','afternoon'],
+    health:"Lean chicken protein in a buttery crust — comfort food that actually keeps you full.",
+    popup:(t,w)=>`Tender chicken in a creamy pastry shell. For ${t}${w==='rainy'?' in the rain':w==='cold'?' in this harmattan cold':''}, this is the comfort food your body is asking for.` },
+  { food:"Puff Puff",       emoji:"🍡", drink:"Chapman 🥤",      special:false, tags:['sweet','light','anytime','hot','afternoon','evening'],
+    health:"A light fried snack that satisfies sweet cravings without being too heavy.",
+    popup:(t,w)=>`Hot, round, lightly sweetened puff puff for ${t}. ${w==='hot'?'Light enough for the heat and impossible to eat just one.':'Crispy outside, fluffy inside — absolute classic.'}` },
+  { food:"Red Velvet Cake", emoji:"🎂", drink:"Milk tea 🧋",     special:false, tags:['sweet','afternoon','anytime','rainy','harmattan'],
+    health:"Red velvet's cocoa base gives you a gentle mood boost — comfort and indulgence in every bite.",
+    popup:(t,w)=>`Layers of red velvet with cream cheese frosting. This ${t} treat is as beautiful as it is delicious${w==='rainy'?' — perfect for a cosy rainy day in':''}.` },
+  { food:"Custom Cake",     emoji:"🎂", drink:"Mocktail 🍹",     special:false, tags:['sweet','anytime','afternoon','rainy','hot','harmattan'],
+    health:"A cake made just for you — every ingredient chosen with care. That's love, and love is good for the soul.",
+    popup:(t,w)=>`Any flavor, any occasion, made from scratch just for you. ${t==='morning'?'Plan ahead — ':''}Order your custom cake today and Pinxy will make it exactly how you imagined.` },
+  { food:"Banana Bread Toast",emoji:"🍞",drink:"Zobo 🥤",        special:false, tags:['warm','sweet','morning','harmattan','rainy'],
+    health:"Toasted banana bread gives you slow-release energy — perfect for a focused morning.",
+    popup:(t,w)=>`Toasted banana bread for ${t}${w==='cold'?' — the harmattan chill makes this hit even harder':w==='rainy'?' while the rain taps on your window':''}. Simple, warm, perfect.` },
+  { food:"Scotch Egg",      emoji:"🥚", drink:"Zobo 🥤",         special:false, tags:['savory','heavy','morning','anytime','harmattan','hot'],
+    health:"Eggs are one of the most complete proteins — a scotch egg is basically a full meal in your hand.",
+    popup:(t,w)=>`A boiled egg wrapped in seasoned mince, breadcrumbed and fried. For ${t} this is a proper meal${w==='cold'?' — exactly what you need when the harmattan bites':''}.` },
+];
 
-  const weekdaySuggestions = [
-    { food: "Banana Bread", emoji: "🍌", detail: "Warm & fresh out the oven", drink: "☕ Hot tea" },
-    { food: "Cinnamon Rolls", emoji: "🌀", detail: "Glazed, soft, pull-apart", drink: "🥛 Cold milk" },
-    { food: "Sardine Bread", emoji: "🍞", detail: "Spiced & savory stuffed roll", drink: "🧃 Juice" },
-    { food: "Classic Cupcake", emoji: "🧁", detail: "Vanilla or choc, your pick", drink: "☕ Coffee" },
-    { food: "Sausage Roll", emoji: "🥐", detail: "Flaky puff pastry perfection", drink: "🧃 Juice" },
-    { food: "Chocolate Cake", emoji: "🍫", detail: "Rich ganache, moist layers", drink: "☕ Espresso" },
-    { food: "Chin Chin", emoji: "✨", detail: "Crunchy little bites of joy", drink: "🥤 Smoothie" },
-    { food: "Doughnut", emoji: "🍩", detail: "Glazed & airy inside", drink: "☕ Latte" },
-  ];
+const rotatingMessages = [
+  "perfect for a cupcake ❤️","start with a chocolate cake ❤️",
+  "a cinnamon roll sounds just right ❤️","treat yourself to a meat pie ❤️",
+  "banana bread hits different today ❤️","you deserve something sweet ❤️",
+  "puff puff energy today ❤️","a sausage roll & good vibes ❤️",
+  "nothing says love like cake ❤️","sardine bread? surprisingly amazing ❤️",
+  "hot chicken pie just dropped ❤️","chin chin and chill ❤️",
+  "red velvet is always the answer ❤️","rainy day calls for something warm ❤️",
+  "treat yourself, you earned it ❤️","custom cake? say less ❤️",
+];
 
-  const weekendSuggestions = [
-    { food: "Meat Pie", emoji: "🥧", detail: "Flaky, beefy, properly filling", drink: "🥤 Cold drink" },
-    { food: "Chicken Pie", emoji: "🍗", detail: "Creamy chicken in pastry shell", drink: "🧃 Juice" },
-    { food: "Classic Cupcake", emoji: "🧁", detail: "Weekend treat, you deserve it", drink: "☕ Coffee" },
-    { food: "Custom Cake", emoji: "🎂", detail: "Perfect for weekend celebrations", drink: "🍹 Mocktail" },
-    { food: "Puff Puff", emoji: "🟤", detail: "Hot, sweet, crispy outside", drink: "🥤 Chapman" },
-  ];
+const menuData = [
+  { name:"Classic Cupcake", desc:"Vanilla or chocolate, whipped frosting",      price:"₦1,500 per piece" },
+  { name:"Red Velvet Cake", desc:"Layered with cream cheese frosting",           price:"₦18,000 whole · ₦2,500 slice" },
+  { name:"Chocolate Cake",  desc:"Rich ganache, deeply moist layers",            price:"₦20,000 whole · ₦2,500 slice" },
+  { name:"Banana Bread",    desc:"Soft loaf, ripe banana, hint of cinnamon",     price:"₦5,000 loaf · ₦800 slice" },
+  { name:"Cinnamon Rolls",  desc:"Glazed, warm, pull-apart",                     price:"₦2,000 per piece" },
+  { name:"Sardine Bread",   desc:"Soft roll stuffed with spiced sardine",         price:"₦1,500 per piece" },
+  { name:"Meat Pie",        desc:"Flaky pastry, minced beef & veg filling",      price:"₦2,000 per piece" },
+  { name:"Chicken Pie",     desc:"Tender chicken in creamy pastry shell",        price:"₦2,500 per piece" },
+  { name:"Sausage Roll",    desc:"Puff pastry wrapped seasoned sausage",         price:"₦1,500 per piece" },
+  { name:"Doughnut",        desc:"Glazed or sugar-coated, airy inside",          price:"₦1,000 per piece" },
+  { name:"Puff Puff",       desc:"Deep-fried dough balls, lightly sweetened",    price:"₦3,000 pack of 6" },
+  { name:"Chin Chin",       desc:"Crispy fried snack, crunchy & golden",         price:"₦2,000 small · ₦3,500 large" },
+  { name:"Custom Cake",     desc:"Any flavor, any occasion — order ahead",       price:"Price on request" },
+];
 
-  const rotatingMessages = [
-    "perfect for a cupcake ❤️",
-    "start with a chocolate cake ❤️",
-    "have a brownie for the soul ❤️",
-    "a cinnamon roll sounds just right ❤️",
-    "treat yourself to a meat pie ❤️",
-    "banana bread hits different today ❤️",
-    "you deserve a slice of something sweet ❤️",
-    "puff puff energy today ❤️",
-    "a sausage roll & good vibes ❤️",
-    "nothing says love like cake ❤️",
-    "sardine bread? surprisingly amazing ❤️",
-    "hot chicken pie just dropped ❤️",
-  ];
+// ── DARK MODE ──
+function toggleDark() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+  document.getElementById('darkBtn').textContent = isDark ? '🌙' : '☀️';
+}
 
-  function getGreeting(hour) {
-    if (hour < 12) return "Morning! ☀️";
-    if (hour < 17) return "Afternoon! 🌤️";
-    return "Evening! 🌙";
-  }
+// ── NAV SCROLL ──
+function navScrollTo(id) {
+  const target = document.getElementById(id);
+  const app    = document.getElementById('app');
+  if (!target || !app) return;
+  let offset = 0, el = target;
+  while (el && el !== app) { offset += el.offsetTop; el = el.offsetParent; }
+  app.scrollTo({ top: offset, behavior: 'smooth' });
+}
 
-  function buildHome() {
-    const now = new Date();
-    const hour = now.getHours();
-    const day = now.getDay();
-    const isWeekend = day === 0 || day === 6;
+// Active nav on scroll
+const app = document.getElementById('app');
+app.addEventListener('scroll', function() {
+  const sy = app.scrollTop + 100;
+  let current = 'hero';
+  ['contact','menu','picks','hero'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= sy) current = id;
+  });
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const map = { hero:'nav-home', picks:'nav-home', menu:'nav-menu', contact:'nav-contact' };
+  const btn = document.getElementById(map[current]);
+  if (btn) btn.classList.add('active');
+});
 
-    document.getElementById('greetingLine').textContent = getGreeting(hour);
+// ── BACKGROUND SLIDESHOW ──
+let slideIdx = 0;
+const totalSlides = 5;
+function nextSlide() {
+  document.getElementById('slide-' + slideIdx).classList.remove('active');
+  slideIdx = (slideIdx + 1) % totalSlides;
+  document.getElementById('slide-' + slideIdx).classList.add('active');
+}
+setInterval(nextSlide, 60000); // every 60 seconds
 
-    const msgKey = 'pinxy_msg_idx';
-    let idx = parseInt(sessionStorage.getItem(msgKey) || '-1');
-    idx = (idx + 1) % rotatingMessages.length;
-    sessionStorage.setItem(msgKey, idx);
-    document.getElementById('suggestionLine').textContent = rotatingMessages[idx];
+// ── POPUP ──
+function openPopup(idx) {
+  const item = allSuggestions[idx];
+  const now  = new Date();
+  const { timeLabel, weatherMood } = getVibeContext(now.getHours(), getSeason());
+  document.getElementById('popupEmoji').textContent   = item.emoji;
+  document.getElementById('popupName').textContent    = item.food;
+  document.getElementById('popupDrink').textContent   = '🥂 Pairs with: ' + item.drink;
+  document.getElementById('popupDesc').textContent    = item.popup(timeLabel, weatherMood);
+  document.getElementById('popupHealth').textContent  = '💚 ' + item.health;
+  document.getElementById('popupContact').classList.remove('open');
+  document.getElementById('popupOrderBtn').textContent = 'Order this now 🩷';
+  document.getElementById('popupOverlay').classList.add('active');
+  document.getElementById('popupSheet').classList.add('active');
+}
+function closePopup() {
+  document.getElementById('popupOverlay').classList.remove('active');
+  document.getElementById('popupSheet').classList.remove('active');
+}
+function togglePopupContact() {
+  const c   = document.getElementById('popupContact');
+  const btn = document.getElementById('popupOrderBtn');
+  const isOpen = c.classList.contains('open');
+  c.classList.toggle('open');
+  btn.textContent = isOpen ? 'Order this now 🩷' : 'Hide contact ✕';
+}
 
-    const pool = isWeekend ? weekendSuggestions : weekdaySuggestions;
-    let filtered = pool;
-    if (hour < 12) {
-      filtered = pool.filter(s => !['Meat Pie','Chicken Pie','Custom Cake'].includes(s.food));
-      if (filtered.length < 3) filtered = pool;
-    }
+// ── HOME ──
+function buildHome() {
+  const now    = new Date();
+  const hour   = now.getHours();
+  const day    = now.getDay();
+  const isWeekend = day === 0 || day === 6;
+  const season = getSeason();
+  const { timeLabel, weatherMood, isMorning } = getVibeContext(hour, season);
 
-    const shuffled = [...filtered].sort(() => 0.5 - Math.random()).slice(0, 4);
-    const grid = document.getElementById('suggestionGrid');
-    grid.innerHTML = shuffled.map(s => `
-      <div class="suggestion-card">
-        <span class="card-emoji">${s.emoji}</span>
-        <div class="card-info">
-          <div class="card-name">${s.food}</div>
-          <div class="card-detail">${s.detail}</div>
-        </div>
-        <div class="card-drink">${s.drink}</div>
+  const icon  = hour < 12 ? '☀️' : hour < 17 ? '🌤️' : '🌙';
+  const word  = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  let greet   = icon + ' ' + word;
+  if (hour >= 20) greet += ' · ordering for tomorrow? We open at 8am 🌅';
+  document.getElementById('greetingTime').textContent = greet;
+
+  const msgKey = 'pinxy_msg_idx';
+  let idx = parseInt(sessionStorage.getItem(msgKey) || '-1');
+  idx = (idx + 1) % rotatingMessages.length;
+  sessionStorage.setItem(msgKey, idx);
+  document.getElementById('greetingSuggest').textContent = rotatingMessages[idx];
+
+  // Smart pool
+  let pool = allSuggestions.filter(s => {
+    if (isWeekend && ['Meat Pie','Chicken Pie','Custom Cake','Puff Puff'].includes(s.food)) return true;
+    if (isMorning && s.tags.includes('heavy') && !s.tags.includes('morning')) return false;
+    if (season === 'harmattan' && s.tags.includes('harmattan')) return true;
+    if (season === 'rainy'     && s.tags.includes('rainy'))     return true;
+    if (season === 'hot'       && s.tags.includes('hot'))       return true;
+    if (s.tags.includes('anytime')) return true;
+    return false;
+  });
+  if (pool.length < 4) pool = allSuggestions;
+
+  const shuffled = [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
+  document.getElementById('picksScroll').innerHTML = shuffled.map((s, i) => {
+    const gIdx = allSuggestions.indexOf(s);
+    return `<div class="pick-tile ${s.special?'special':''}" onclick="openPopup(${gIdx})" style="animation-delay:${i*0.07}s">
+      <span class="pick-emoji card-emoji">${s.emoji}</span>
+      <div class="pick-name">${s.food}</div>
+      <div class="pick-drink">${s.drink}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── MENU ──
+function buildMenu() {
+  document.getElementById('menuList').innerHTML = menuData.map(item => `
+    <div class="menu-item-wrap">
+      <div class="menu-top">
+        <div class="menu-item-name">${item.name}</div>
+        <div class="menu-dots"></div>
+        <div class="menu-price">${item.price}</div>
       </div>
-    `).join('');
-  }
+      <div class="menu-desc">${item.desc}</div>
+    </div>`).join('');
+}
 
-  buildHome();
+buildHome();
+buildMenu();
 </script>
 </body>
 </html>
