@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#EDD2E3" media="(prefers-color-scheme: light)"/>
+<meta name="theme-color" content="#1a0a12" media="(prefers-color-scheme: dark)"/>
+<meta id="themeColorMeta" name="theme-color" content="#EDD2E3"/>
 <title>Pinxy's Treats</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
@@ -16,17 +19,73 @@
   --text:   #2A1520;
   --muted:  #907080;
   --white:  #FAF6F2;
+  --bg-top: #EDD2E3;
+  --bg-bot: #FAF6F2;
+}
+[data-theme="dark"] {
+  --bg-top: #1a0a12;
+  --bg-bot: #0e0609;
 }
 
-/* Dark mode: invert everything EXCEPT images */
-[data-theme="dark"] {
-  filter: invert(1) hue-rotate(180deg);
+/* Dark mode */
+[data-theme="dark"] body {
+  background: linear-gradient(180deg, #1a0a12 0%, #0e0609 100%);
+  color: #f0e0ea;
 }
-/* Re-invert images so they look normal in dark mode */
-[data-theme="dark"] img,
-[data-theme="dark"] .card-emoji {
-  filter: invert(1) hue-rotate(180deg);
+[data-theme="dark"] #app {
+  background: transparent;
 }
+[data-theme="dark"] .bg-overlay {
+  background: linear-gradient(160deg,
+    rgba(26,10,18,0.82) 0%,
+    rgba(20,6,14,0.80) 30%,
+    rgba(18,4,12,0.78) 60%,
+    rgba(14,6,9,0.90) 100%
+  );
+}
+[data-theme="dark"] .brand-name { color: #f0d8e8; }
+[data-theme="dark"] .brand-tagline { color: #b090a0; }
+[data-theme="dark"] .greeting-pill {
+  background: linear-gradient(135deg, rgba(60,20,40,0.7) 0%, rgba(40,10,25,0.5) 100%);
+  border-color: rgba(200,24,92,0.25);
+}
+[data-theme="dark"] .greeting-time { color: #b090a0; }
+[data-theme="dark"] .section-label { color: #f0d8e8; }
+[data-theme="dark"] .section-sub { color: #907080; }
+[data-theme="dark"] .pick-tile {
+  background: linear-gradient(145deg, rgba(60,20,40,0.65) 0%, rgba(40,10,25,0.45) 100%);
+  border-color: rgba(200,24,92,0.2);
+}
+[data-theme="dark"] .pick-name { color: #f0d8e8; }
+[data-theme="dark"] .menu-item-name { color: #f0d8e8; }
+[data-theme="dark"] .menu-item-wrap { border-bottom-color: rgba(200,24,92,0.12); }
+[data-theme="dark"] 
+[data-theme="dark"] .menu-dots { border-bottom-color: rgba(200,24,92,0.2); }
+[data-theme="dark"] .drinks-soon {
+  background: linear-gradient(135deg, rgba(50,15,32,0.7) 0%, rgba(30,8,20,0.6) 100%);
+  border-color: rgba(200,24,92,0.15);
+}
+[data-theme="dark"] .drinks-soon .ds-title { color: #f0d8e8; }
+[data-theme="dark"] .contact-row { border-bottom-color: rgba(200,24,92,0.12); }
+[data-theme="dark"] .contact-lbl { color: #907080; }
+[data-theme="dark"] .signoff { color: #907080; }
+[data-theme="dark"] .dark-toggle {
+  background: linear-gradient(135deg, rgba(60,20,40,0.8) 0%, rgba(40,10,25,0.6) 100%);
+  border-color: rgba(200,24,92,0.3);
+}
+[data-theme="dark"] .gallery-caption {
+  background: linear-gradient(180deg, rgba(14,6,9,0) 0%, rgba(14,6,9,0.75) 30%, rgba(14,6,9,0.92) 100%);
+}
+[data-theme="dark"] .gc-name { color: #f0d8e8; }
+[data-theme="dark"] .popup-sheet {
+  background: linear-gradient(160deg, #2a0e1a 0%, #1a0a12 55%);
+}
+[data-theme="dark"] .popup-name { color: #f0d8e8; }
+[data-theme="dark"] .popup-desc { color: #e0c8d8; }
+[data-theme="dark"] .popup-health { background: rgba(200,24,92,0.08); color: #907080; }
+[data-theme="dark"] .popup-contact { background: rgba(40,10,25,0.8); border-color: rgba(200,24,92,0.2); }
+[data-theme="dark"] .pcr-label { color: #907080; }
+[data-theme="dark"] .wave svg path { fill: rgba(14,6,9,0.4); }
 
 html { scroll-behavior: smooth; }
 
@@ -35,9 +94,13 @@ body {
   width: 100vw;
   margin: 0;
   overflow: hidden;
-  background: var(--cream);
+  background: linear-gradient(180deg, #EDD2E3 0%, #FAF6F2 100%);
   font-family: 'Nunito', sans-serif;
   color: var(--text);
+}
+[data-theme="dark"] body,
+html[data-theme="dark"] {
+  background: linear-gradient(180deg, #1a0a12 0%, #0e0609 100%);
 }
 
 /* ── APP SHELL ── */
@@ -135,17 +198,13 @@ body {
 .greeting-pill {
   border-radius: 30px;
   padding: 10px 22px;
-  background: linear-gradient(135deg,
-    rgba(255,255,255,0.52) 0%,
-    rgba(255,255,255,0.22) 50%,
-    rgba(255,180,220,0.22) 100%
-  );
-  border: 1px solid rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.8),
-    inset 0 -1px 1px rgba(180,60,110,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    
     0 4px 20px rgba(150,30,80,0.1);
   position: relative;
   overflow: hidden;
@@ -153,13 +212,7 @@ body {
   animation-delay: 0.2s;
   text-align: center;
 }
-.greeting-pill::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; height: 50%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, transparent 100%);
-  pointer-events: none;
-}
+
 .greeting-time {
   font-size: 0.75rem;
   font-weight: 600;
@@ -220,28 +273,19 @@ body {
   gap: 7px;
   cursor: pointer;
   transition: transform 0.18s;
-  background: linear-gradient(145deg,
-    rgba(255,255,255,0.52) 0%,
-    rgba(255,210,235,0.22) 100%
-  );
-  border: 1px solid rgba(255,255,255,0.68);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
   backdrop-filter: blur(18px) saturate(160%);
   -webkit-backdrop-filter: blur(18px) saturate(160%);
   box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.8),
-    inset 0 -1px 1px rgba(180,60,110,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    
     0 4px 18px rgba(150,30,80,0.09),
     0 1px 3px rgba(0,0,0,0.04);
   position: relative;
   overflow: hidden;
 }
-.pick-tile::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; height: 42%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, transparent 100%);
-  pointer-events: none;
-}
+
 .pick-tile:active { transform: scale(0.95); }
 .pick-tile.special .pick-name::after {
   content: ' ✦';
@@ -270,12 +314,15 @@ body {
   text-align: center;
 }
 
+/* ── GLASS PANEL ── */
+
+
 /* ── MENU ── */
 #menu { background: transparent; }
 .menu-list { display: flex; flex-direction: column; }
 .menu-item-wrap {
   padding: 10px 0;
-  border-bottom: 1px solid rgba(180,140,160,0.15);
+  border-bottom: 1px solid rgba(180,140,160,0.18);
 }
 .menu-item-wrap:last-child { border-bottom: none; }
 .menu-top {
@@ -315,14 +362,11 @@ body {
   text-align: center;
   padding: 26px 20px;
   border-radius: 22px;
-  background: linear-gradient(135deg,
-    rgba(255,255,255,0.48) 0%,
-    rgba(255,210,235,0.22) 100%
-  );
-  border: 1px solid rgba(255,255,255,0.65);
-  backdrop-filter: blur(16px);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(28px) saturate(180%) brightness(1.06);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: inset 0 1px 1px rgba(255,255,255,0.75), 0 2px 12px rgba(150,30,80,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 12px rgba(150,30,80,0.07);
 }
 .drinks-soon .ds-icon { font-size: 2rem; margin-bottom: 8px; }
 .drinks-soon .ds-title {
@@ -380,24 +424,24 @@ body {
   bottom: 0; left: 0; right: 0;
   padding: 10px 12px 12px;
   background: linear-gradient(180deg,
-    rgba(250,246,242,0) 0%,
-    rgba(250,246,242,0.75) 30%,
-    rgba(250,246,242,0.92) 100%
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,0.45) 40%,
+    rgba(0,0,0,0.72) 100%
   );
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  border-top: 1px solid rgba(255,255,255,0.5);
+  backdrop-filter: blur(8px) saturate(160%);
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  border-top: 1px solid rgba(255,255,255,0.12);
 }
 .gc-name {
   font-family: 'Cormorant Garamond', serif;
   font-size: 0.88rem;
   font-weight: 600;
-  color: var(--text);
+  color: #fff;
   line-height: 1.2;
 }
 .gc-desc {
   font-size: 0.6rem;
-  color: var(--rose);
+  color: rgba(255,200,220,0.9);
   font-weight: 600;
   margin-top: 1px;
   letter-spacing: 0.02em;
@@ -455,15 +499,12 @@ body {
   z-index: 999;
   width: 40px; height: 40px;
   border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.65);
-  background: linear-gradient(135deg,
-    rgba(255,255,255,0.5) 0%,
-    rgba(255,200,230,0.25) 100%
-  );
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.85),
+    inset 0 1px 0 rgba(255,255,255,0.2),
     0 4px 20px rgba(150,30,80,0.15);
   cursor: pointer;
   font-size: 16px;
@@ -577,9 +618,9 @@ body {
   margin-top: 14px;
   border-radius: 16px;
   overflow: hidden;
-  background: rgba(255,255,255,0.5);
-  border: 1px solid rgba(255,255,255,0.7);
-  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(28px) saturate(180%) brightness(1.06);
 }
 .popup-contact.open { display: block; }
 .popup-contact-row {
@@ -593,6 +634,36 @@ body {
 .popup-contact-row:last-child { border-bottom: none; }
 .pcr-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
 .pcr-val { font-family: 'Cormorant Garamond', serif; font-size: 0.95rem; font-weight: 600; color: var(--rose); text-decoration: underline; text-underline-offset: 2px; }
+
+/* ── LIQUID GLASS CARD ── */
+.glass-card {
+  border-radius: 22px;
+  padding: 6px 16px 10px;
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(28px) saturate(180%) brightness(1.08);
+  -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(1.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 -1px 0 rgba(255,255,255,0.06),
+    0 8px 32px rgba(0,0,0,0.08),
+    0 1px 2px rgba(0,0,0,0.04);
+  position: relative;
+  overflow: hidden;
+}
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  pointer-events: none;
+}
+
+/* ── DARK MODE BODY GRADIENT ── */
+html[data-theme="dark"] body {
+  background: linear-gradient(180deg, #1A0A12 0%, #120008 40%, #0D0008 100%) !important;
+}
 
 /* ── ANIMATIONS ── */
 @keyframes floatUp {
@@ -668,8 +739,10 @@ body {
   <section id="menu" class="section">
     <div class="section-label">Our Menu</div>
     <div class="section-sub">Everything made fresh to order</div>
-    <div class="menu-list" id="menuList"></div>
-    <div class="drinks-soon">
+    <div class="glass-card">
+      <div class="menu-list" id="menuList"></div>
+    </div>
+    <div class="drinks-soon" style="margin-top:16px;">
       <div class="ds-icon">🥤</div>
       <div class="ds-title">Still perfecting this…</div>
       <div class="ds-note">Bear with us 🩷 Something delicious to sip alongside your treats is on its way.</div>
@@ -744,6 +817,7 @@ body {
   <section id="contact" class="section">
     <div class="section-label">Come say hello 🩷</div>
     <div class="section-sub">Place an order, ask anything, or book Pinxy for your next event</div>
+    <div class="glass-card">
     <div class="contact-list">
       <div class="contact-row">
         <span class="contact-lbl">Call us :</span>
@@ -762,6 +836,7 @@ body {
         <span class="contact-val"><a href="mailto:hello@pinxytreats.com">hello@pinxytreats.com</a></span>
       </div>
     </div>
+    </div><!-- /glass-card -->
     <div class="signoff">
       Every order is made with care and a little extra love.<br>
       We can't wait to bake something special for you.
@@ -900,8 +975,16 @@ const menuData = [
 // ── DARK MODE ──
 function toggleDark() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
+  const next = isDark ? '' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
   document.getElementById('darkBtn').textContent = isDark ? '🌙' : '☀️';
+  // Update theme-color so status bar + browser chrome match
+  const meta = document.getElementById('themeColorMeta');
+  if (meta) meta.setAttribute('content', isDark ? '#EDD2E3' : '#1a0a12');
+  // Animate body gradient
+  document.body.style.background = isDark
+    ? 'linear-gradient(180deg, #EDD2E3 0%, #FAF6F2 100%)'
+    : 'linear-gradient(180deg, #1a0a12 0%, #0e0609 100%)';
 }
 
 // ── NAV SCROLL ──
